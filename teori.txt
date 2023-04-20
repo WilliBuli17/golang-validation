@@ -1,0 +1,171 @@
+-- Pengenalan Validation
+        1. Saat kita membuat aplikasi, validasi adalah salah satu hal yang selalu dibuat
+        2. alidasi dilakukan untuk memastikan bahwa data yang diproses sudah benar
+        3. Validasi adalah sesuatu yang wajib dilakukan saat pembuatan aplikasi,
+           agar kesalahan pada data bisa ditemukan secepat mungkin sebelum data tersebut di proses
+
+        -- Tempat Melakukan Validasi
+                1. Validasi sering dilakukan di banyak bagian dalam aplikasi, seperti
+                2. Web, validasi request dari pengguna
+                3. Business Logic, validasi data
+                4. Database, validasi constraint
+                5. Beberapa bagian, kadang menggunakan validasi yang sama. Oleh karena itu pembuatan validasi secara manual sangat memakan waktu,
+                   dan kesalahan sedikit bisa menyebabkan validasi tidak konsisten
+
+        -- Kenapa Butuh Validasi?
+                1. Sederhana, untuk memastikan request atau data yang dikirim oleh pengguna sudah sesuai dengan yang kita inginkan
+                2. Never trust user input
+
+-- Validator Package
+        1. Saat kita melakukan validasi, biasanya kita akan melakukan validasi secara manual
+        2. Rata-rata, validasi manual akan menggunakan if statement
+        3. Semakin banyak validasi yang diperlukan, semakin banyak if statement yang harus dibuat
+
+        -- Validation Library
+                1. Penggunaan library untuk melakukan validasi sangat direkomendasikan
+                2. Hal ini agar kode validasi bisa lebih mudah, rapi dan juga sama antar programmer
+                3. Ada banyak sekali library yang bisa kita gunakan untuk mempermudah dalam pembuatan validasi di kode program kita
+                4. Salah satunya, yang akan kita gunakan di kelas ini adalah Validator Package
+
+        -- Validator Package
+                1. Salah satu library yang banyak digunakan untuk membantu melakukan validation adalah Validator Package
+                2. Validator Package adalah opensource library untuk melakukan validation di golang
+                3. Validator Package memiliki banyak sekali fitur yang bisa kita gunakan untuk mempermudah kita melakukan validasi
+                        https://github.com/go-playground/validator
+                        go get github.com/go-playground/validator/v10
+
+-- Validate Struct
+        1. Validator Package di desain agar thread safe dan digunakan sebagai object singleton (cukup buat satu object saja)
+        2. Validator Package akan melakukan cache informasi seperti rules, tags, dan lain-lain yang berhubungan dengan validation kita
+        3. Cache adalah menyimpan informasi di memory, sehingga bisa digunakan lagi tanpa harus melakukan eksekusi kode program lagi,
+           hal ini akan mempercepat proses
+        4. Jika kita selalu membuat object baru, maka keuntungan cache tidak bisa didapatkan
+        5. Package Validator merepresentasikan object untuk validation nya dalam struct bernama Validate di package validator
+
+-- Validasi Variable
+        1. Sekarang kita akan coba melakukan validasi terhadap variable menggunakan Validator Package
+        2. Saat kita melakukan validasi, biasanya kita akan melakukan validasi terhadap variable yang tersedia, baik itu variable yang terdapat di Struct atau function parameter
+        3. Untuk melakukan validasi variable, kita bisa gunakan method :
+               Validate.Var(variable, tag)
+               Validate.VarCtx(ctx, variable, tag)
+
+        -- Validator Tag
+                1. Validator Package menggunakan konsep Tag untuk menyebutkan validation yang ingin digunakan
+                2. Setiap jenis validation, memiliki nama tag masing-masing, kita akan bahas di materi khusus untuk ini
+                3. Contoh validasi bahwa sebuah value harus ada isinya, bukan default value, misal kita bisa gunakan tag “required”,
+                   jika number pastikan bukan default number 0, dan jika string bukan default string “”, dan jika array/slice,
+                   bukan default array/slice kosong
+
+-- Validasi Dua Variable
+        1. Kadang, ada kasus dimana kita ingin melakukan validasi untuk membandingkan dua buah variable
+        2. Misal kita mau memastikan variable password dan confirmPassword harus sama, kita bisa gunakan tag eqfield
+        3. Untuk melakukan validasi dua variable, kita bisa gunakan method :
+               Validate.VarWithValue(first, second, tag)
+               Validate.VarWithValueCtx(ctx, first, second, tag)
+
+-- Baked-in Validations
+        1. Validator Package sudah menyediakan banyak sekali validation yang biasanya kita butuhkan,
+           dari yang sederhana seperti required (string tidak boleh kosong), email (format data harus email), dan lain-lain
+        2. Ada banyak sekali Baked-in Validation yang sudah tersedia, dan kita hanya perlu menggunakan nama tag nya saja
+                https://pkg.go.dev/github.com/go-playground/validator/v10#readme-baked-in-validations
+
+-- Multiple Tag Validation
+        1. Tag pada validation bisa lebih dari satu, kita bisa tambahkan , (koma) dan diikuti dengan tag selanjutnya
+
+-- Tag Parameter
+        1. Validator Package, mendukung penggunaan parameter ketika menggunakan tag
+        2. Ini sangat berguna pada kasus validasi yang memang butuh data parameter, contohnya min, max, length, dan lain-lain
+        3. Untuk menggunakan parameter, kita bisa langsung menggunakan tanda = (sama dengan) setelah tag,
+           dan diikuti dengan nilai parameter nya
+
+-- Validasi Struct
+        1. Selain melakukan validasi variable, Validator Package juga bisa digunakan untuk melakukan validasi terhadap struct
+        2. Dengan begitu, kita bisa langsung melakukan validasi terhadap semua field yang terdapat di Struct tersebut
+        3. Tag untuk validasi, bisa kita tambahkan dengan menambah reflection tag di Struct field-nya dengan tag validate
+
+-- Validation Errors
+        1. Saat kita melakukan validasi, Validator Package akan mengembalikan data error
+        2. Jika error tersebut bernilai nil, artinya semua data valid, tidak terjadi validation error
+        3. Namun jika tidak nill, artinya terdapat data yang error
+
+        -- Validation Errors
+                1. Kita tahu bahwa error adalah kontrak interface dari golang untuk membuat error
+                2. Validator Package sendiri sebenarnya memiliki detail struct untuk implementasi error ini, yaitu ValidationErrors
+                3. Kita bisa melakukan konversi ke ValidationErrors ketika terjadi validation error
+                4. Terdapat banyak sekali informasi yang bisa kita ambil dari ValidationErrors
+                5. ValidationErrors sendiri sebenarnya adalah alias untuk []FieldError
+
+-- Validasi Cross Field
+        1. Sebelumnya kita sudah tahu Validator Package memiliki validation khusus untuk validasi dua variable
+        2. Validation tersebut juga bisa digunakan untuk validasi cross Field jika di dalam Struct
+        3. Caranya kita bisa menggunakan validation tag yang sama, namun perlu sebutkan field kedua-nya
+        4. Misal pada Field Password, kita bisa tambahkan validate:eqfield=ConfirmPassword
+
+-- Validasi Nested Struct
+        1. Secara default, saat kita membuat Struct yang berisikan Field Struct lainnya
+        2. Validator Package akan melakukan validasi terhadap Field Struct tersebut secara otomatis
+
+-- Validasi Collection
+        1. Tidak seperti tipe data Struct, jika kita memiliki field dengan tipe data Collection seperti Array, Slice atau Map,
+           secara default Validator Package tidak akan melakukan validasi terhadap data-data yang terdapat di dalam collection tersebut
+        2. Namun, jika kita ingin melakukan validasi semua data yang terdapat di Collection-nya, kita bisa tambahkan tag dive
+
+-- Basic Collection
+        1. Bagaimana jika data Collection nya adalah tipe data yang bukan Struct, misal []String?
+        2. Pada kasus seperti ini, kita bisa tambahkan validation nya langsung setelah menambahkan tag dive
+        3. Misal pada field Hobbies []String, kita bisa tambahkan tag dive,required,min=1,
+           artinya tiap String di []String harus required dan min=1
+
+-- Validasi Map
+        1. Selain Collection Array/Slice, kita juga bisa melakukan validasi terhadap Field Map
+        2. Karena dalam Map terdapat Key dan Value, kita bisa menggunakan dive untuk key dan dive untuk value
+        3. Namun khusus untuk key, kita harus tandai dengan tag keys dan diakhiri dengan endkeys
+
+-- Basic Map
+        1. Kadang, kita juga sering membuat tipe data Map dengan key dan value berupa tipe data bukan Struct
+        2. Pada kasus ini, jika kita ingin menambah validasi, caranya sama seperti pada Basic Collection,
+           namun khusus untuk key, perlu ditambahkan keys dan endkeys
+        3. Field Wallet map[string]int dengan tag dive,keys,required,endkeys,required,gt=0, artinya key string required,
+           dan value required dan gt=0
+        4. Karena value bukanlah Struct, jadi kita tidak perlu menambahkan dive lagi pada value
+
+-- Alias Tag
+        1. Pada beberapa kasus, kadang kita sering menggunakan beberapa tag validation yang sama untuk Field yang berbeda
+        2. Validator Package memiliki fitur untuk menambahkan alias, yaitu nama tag baru untuk tag lain,
+           bisa satu atau lebih tag lain
+        3. Kita bisa meregistrasikan alias tag baru dengan menggunakan method :
+                Validate.RegisterAlias(alias, tag)
+
+-- Custom Validation
+        1. Bagaimana jika ternyata validation yang kita butuhkan tidak tersedia di baked-in Validator Package?
+        2. Tenang saja, kita bisa membuat Custom Validation sendiri, dengan membuat function dengan parameter validator.FieldLevel,
+           lalu registrasikan ke Validate menggunakan :
+                Validate.RegisterValidation(tag, function)
+
+        -- FieldLevel
+                1. FieldLevel merupakan parameter dari Validation Function yang kita buat
+                2. FieldLevel berisikan informasi Reflection seperti Field Value, Name dan lain-lain
+
+-- Custom Validation Parameter
+        1. Di Baked-in Validation, beberapa validation memiliki parameter, misal min=10
+        2. Kita juga mengambil informasi nilai parameter nya di FieldLevel.Param()
+        3. Ini sangat cocok ketika kita membuat Validation yang memang membutuhkan parameter tambahan
+
+-- Or Rule
+        1. Pada beberapa kasus, kadang kita ingin membuat kondisi OR pada validation
+        2. Misal sebuah Field boleh email atau nomor telepon misalnya, artinya validasinya tidak bisa email,numeric
+        3. Karena jika seperti itu, artinya Field wajib Email dan Numeric, sedangkan dua hal itu pasti berbeda
+        4. Pada kasus ini, kita bisa gunakan | (pipe) sebagai pemisah untuk menandakan bahwa itu adalah OR
+        5. Secara default, ketika menggunakan , (koma) artinya adalah AND
+
+-- Custom Validation Cross Field
+        1. Saat membuat custom validation, parameter FieldLevel juga bisa digunakan untuk mendapatkan value kedua secara langsung dari Struct
+        2. Kita bisa menggunakan method FieldLevel.GetStructFieldOK2()
+        3. Method GetStructFieldOK2() secara otomatis akan menggunakan Param sebagai nama Field di Struct nya
+        4. Misal ketika kita gunakan tag xxx=Yyy, maka GetStructFieldOK2() akan mengembalikan Field Yyy didalam Struct nya
+
+-- Struct Level Validation
+        1. Kadang ada kasus untuk melakukan validasi butuh kombinasi lebih dari dua field
+        2. Sampai saat ini, kita hanya membuat validasi untuk single field, atau cross field
+        3. Validator Package mendukung pembuatan validasi di level Struct, namun kita perlu membuat validation function menggunakan parameter StructLevel
+        4. Kita bisa meregistrasikan validation nya menggunakan method Validate.RegisterStructValidation()
